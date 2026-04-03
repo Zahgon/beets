@@ -26,6 +26,12 @@ New features
       after upgrading to trigger the migration. Only then you can safely move
       the library to a new location.
 
+- :doc:`plugins/smartplaylist`: A ``--quiet`` flag is added to the ``splupdate``
+  command to suppress several log messages for each updated playlist and in
+  pretend mode only prints the playlist name and the number of tracks instead of
+  each track name. This can be useful when testing out new entries in the
+  configuration.
+
 Bug fixes
 ~~~~~~~~~
 
