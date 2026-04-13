@@ -28,8 +28,8 @@ New features
 
 - **Tidal plugin**: Introduces a new plugin for fetching metadata from Tidal. It
   supports album and track lookups by ID, including batch operations via
-  `albums_for_ids` and `tracks_for_ids`. It also enables search by query as well
-  as identifier-based retrieval, with support for ISRC codes (tracks) and
+  ``albums_for_ids`` and ``tracks_for_ids``. It also enables search by query as
+  well as identifier-based retrieval, with support for ISRC codes (tracks) and
   barcode/EANs (albums).
 
   This is an initial, relatively minimal implementation, but already fully
