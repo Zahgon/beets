@@ -279,15 +279,17 @@ class SmartPlaylistPlugin(BeetsPlugin):
 
     def update_playlists(self, lib: Library, pretend: bool = False) -> None:
         quiet = self.config["quiet"].get(bool)
-        if pretend and not quiet:
-            self._log.info(
-                "Showing query results for {} smart playlists...",
-                len(self._matched_playlists),
-            )
-        elif not pretend:
-            self._log.info(
-                "Updating {} smart playlists...", len(self._matched_playlists)
-            )
+        if not quiet:
+            if pretend:
+                self._log.info(
+                    "Showing query results for {} smart playlists...",
+                    len(self._matched_playlists),
+                )
+            else:
+                self._log.info(
+                    "Updating {} smart playlists...",
+                    len(self._matched_playlists),
+                )
 
         playlist_dir = bytestring_path(
             self.config["playlist_dir"].as_filename()
@@ -307,10 +309,6 @@ class SmartPlaylistPlugin(BeetsPlugin):
         for playlist in self._matched_playlists:
             pretend_count = 0
             name, (query, q_sort), (album_query, a_q_sort) = playlist
-            if pretend and not quiet:
-                self._log.info("Results for playlist {}:", name)
-            elif not quiet:
-                self._log.info("Creating playlist {}", name)
             items = []
 
             # Handle tuple/list of queries (preserves order)
@@ -375,7 +373,14 @@ class SmartPlaylistPlugin(BeetsPlugin):
                         print(item)
                     pretend_count += 1
             if quiet:
-                self._log.info("{}: {} items matched.", name, pretend_count)
+                if pretend:
+                    self._log.info("{}: {} items matched.", name, pretend_count)
+                else:
+                    self._log.info("{}: {} tracks.", name, pretend_count)
+            elif not pretend:
+                self._log.info(
+                    "Creating playlist {}: {} tracks.", name, pretend_count
+                )
 
         if not pretend:
             # Write all of the accumulated track lists to files.
@@ -413,15 +418,17 @@ class SmartPlaylistPlugin(BeetsPlugin):
             # Send an event when playlists were updated.
             send_event("smartplaylist_update")  # type: ignore
 
-        if pretend and not quiet:
-            self._log.info(
-                "Displayed results for {} playlists",
-                len(self._matched_playlists),
-            )
-        elif pretend:
-            self._log.info(
-                "{} playlists would be updated", len(self._matched_playlists)
-            )
+        if pretend:
+            if quiet:
+                self._log.info(
+                    "{} playlists would be updated",
+                    len(self._matched_playlists),
+                )
+            else:
+                self._log.info(
+                    "Displayed results for {} playlists",
+                    len(self._matched_playlists),
+                )
         else:
             self._log.info("{} playlists updated", len(self._matched_playlists))
 
