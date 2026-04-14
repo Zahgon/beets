@@ -592,6 +592,34 @@ class SmartPlaylistCLITest(IOMixin, PluginTestCase):
             "'a one.m3u' 'rock'\"'\"'n roll.m3u' 'z last.m3u' found"
         )
 
+    def test_splupdate_log_output(self):
+        with self.assertLogs("beets.smartplaylist", level="INFO") as logs:
+            self.run_with_output("splupdate", "my_playlist")
+
+        output = "\n".join(logs.output)
+        assert "Updating 1 smart playlists..." in output
+        assert "Creating playlist my_playlist.m3u: 1 tracks." in output
+        assert "1 playlists updated" in output
+
+    def test_splupdate_quiet_log_output(self):
+        with self.assertLogs("beets.smartplaylist", level="INFO") as logs:
+            self.run_with_output("splupdate", "--quiet", "my_playlist")
+
+        output = "\n".join(logs.output)
+        assert "Updating" not in output
+        assert "Creating playlist" not in output
+        assert "my_playlist.m3u: 1 tracks." in output
+        assert "1 playlists updated" in output
+
+    def test_splupdate_pretend_log_output(self):
+        with self.assertLogs("beets.smartplaylist", level="INFO") as logs:
+            self.run_with_output("splupdate", "--pretend", "my_playlist")
+
+        output = "\n".join(logs.output)
+        assert "Showing query results for 1 smart playlists..." in output
+        assert "Results for playlist my_playlist.m3u:" in output
+        assert "Displayed results for 1 playlists" in output
+
     def test_splupdate_pretend_quiet_suppresses_banner(self):
         with self.assertLogs("beets.smartplaylist", level="INFO") as logs:
             self.run_with_output(
