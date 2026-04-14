@@ -309,6 +309,8 @@ class SmartPlaylistPlugin(BeetsPlugin):
         for playlist in self._matched_playlists:
             pretend_count = 0
             name, (query, q_sort), (album_query, a_q_sort) = playlist
+            if pretend and not quiet:
+                self._log.info("Results for playlist {}:", name)
             items = []
 
             # Handle tuple/list of queries (preserves order)
