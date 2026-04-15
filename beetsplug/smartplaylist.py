@@ -307,7 +307,7 @@ class SmartPlaylistPlugin(BeetsPlugin):
         m3u_uris: dict[str, set[Any]] = {}
 
         for playlist in self._matched_playlists:
-            pretend_count = 0
+            matched_count = 0
             name, (query, q_sort), (album_query, a_q_sort) = playlist
             if pretend and not quiet:
                 self._log.info("Results for playlist {}:", name)
@@ -373,15 +373,15 @@ class SmartPlaylistPlugin(BeetsPlugin):
                         print(displayable_path(item_uri))
                     elif pretend and not quiet:
                         print(item)
-                    pretend_count += 1
+                    matched_count += 1
             if quiet:
                 if pretend:
-                    self._log.info("{}: {} items matched.", name, pretend_count)
+                    self._log.info("{}: {} items matched.", name, matched_count)
                 else:
-                    self._log.info("{}: {} tracks.", name, pretend_count)
+                    self._log.info("{}: {} tracks.", name, matched_count)
             elif not pretend:
                 self._log.info(
-                    "Creating playlist {}: {} tracks.", name, pretend_count
+                    "Creating playlist {}: {} tracks.", name, matched_count
                 )
 
         if not pretend:
