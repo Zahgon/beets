@@ -477,7 +477,10 @@ def notify_info_yielded(
         func: Callable[P, Iterable[Ret]],
     ) -> Callable[P, Iterator[Ret]]:
         @wraps(func)
-        pass
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> Iterator[Ret]:
+            pass
+
+        return wrapper
 
     return decorator
 
