@@ -97,3 +97,6 @@ pyrightconfig.json
 
 # Pyrefly
 pyrefly.toml
+
+.aider*
+logs/
