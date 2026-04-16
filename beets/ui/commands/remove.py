@@ -43,9 +43,7 @@ def remove_items(lib, query, album, delete, force):
             ui.print_(format(t, fmt))
 
         def fmt_album(a):
-            ui.print_()
-            for i in a.items():
-                fmt_track(i)
+            pass
 
         fmt_obj = fmt_album if album else fmt_track
 
@@ -68,7 +66,7 @@ def remove_items(lib, query, album, delete, force):
 
 
 def remove_func(lib, opts, args):
-    remove_items(lib, args, opts.album, opts.delete, opts.force)
+    pass
 
 
 remove_cmd = ui.Subcommand(

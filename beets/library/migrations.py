@@ -26,8 +26,7 @@ T = TypeVar("T")
 
 def chunks(lst: list[T], n: int) -> Iterator[list[T]]:
     """Yield successive n-sized chunks from lst."""
-    for i in range(0, len(lst), n):
-        yield lst[i : i + n]
+    pass
 
 
 class MultiValueFieldMigration(Migration):
@@ -38,62 +37,17 @@ class MultiValueFieldMigration(Migration):
 
     @cached_property
     def separators(self) -> list[str]:
-        return ["; ", ", ", " / "]
+        pass
 
     def convert_to_list_value(self, str_value: str) -> str:
         """Normalize legacy str value separators to the canonical delimiter."""
-        for separator in self.separators:
-            if separator in str_value:
-                return str_value.replace(separator, MULTI_VALUE_DELIMITER)
-
-        return str_value
+        pass
 
     def _migrate_data(
         self, model_cls: type[Model], current_fields: set[str]
     ) -> None:
         """Migrate legacy single-valued field to multi-valued field."""
-        str_field, list_field = self.str_field, self.list_field
-        if str_field not in current_fields:
-            # No legacy single-value field, so nothing to migrate.
-            return
-
-        table = model_cls._table
-
-        with self.db.transaction() as tx:
-            rows = tx.query(  # type: ignore[assignment]
-                f"""
-                SELECT id, {str_field}, {list_field}
-                FROM {table}
-                WHERE {str_field} IS NOT NULL AND {str_field} != ''
-                """
-            )
-
-        total = len(rows)
-        to_migrate = [e for e in rows if not e[list_field]]
-        if not to_migrate:
-            return
-
-        migrated = total - len(to_migrate)
-
-        ui.print_(f"Migrating {list_field} for {total} {table}...")
-        for batch in chunks(to_migrate, self.CHUNK_SIZE):
-            with self.db.transaction() as tx:
-                tx.mutate_many(
-                    f"UPDATE {table} SET {list_field} = ? WHERE id = ?",
-                    [
-                        (self.convert_to_list_value(e[str_field]), e["id"])
-                        for e in batch
-                    ],
-                )
-
-            migrated += len(batch)
-
-            ui.print_(
-                f"  Migrated {migrated} {table} "
-                f"({migrated}/{total} processed)..."
-            )
-
-        ui.print_(f"Migration complete: {migrated} of {total} {table} updated")
+        pass
 
 
 class MultiGenreFieldMigration(MultiValueFieldMigration):
@@ -105,12 +59,7 @@ class MultiGenreFieldMigration(MultiValueFieldMigration):
     @cached_property
     def separators(self) -> list[str]:
         """Return known separators that indicate multiple legacy genres."""
-        separators = []
-        with suppress(ConfigError):
-            separators.append(beets.config["lastgenre"]["separator"].as_str())
-
-        separators.extend(super().separators)
-        return unique_list(filter(None, separators))
+        pass
 
 
 class MultiRemixerFieldMigration(MultiValueFieldMigration):
@@ -153,79 +102,7 @@ class LyricsMetadataInFlexFieldsMigration(Migration):
 
     def _migrate_data(self, model_cls: type[Model], _: set[str]) -> None:
         """Migrate legacy lyrics to move metadata to flex attributes."""
-        table = model_cls._table
-        flex_table = model_cls._flex_table
-
-        with self.db.transaction() as tx:
-            migrated_ids = {
-                r[0]
-                for r in tx.query(
-                    f"""
-                    SELECT entity_id
-                    FROM {flex_table}
-                    WHERE key == 'lyrics_backend'
-                    """
-                )
-            }
-        with self.db.transaction() as tx, self.with_row_factory(LyricsRow):
-            rows: list[LyricsRow] = tx.query(  # type: ignore[assignment]
-                f"""
-                SELECT id, lyrics
-                FROM {table}
-                WHERE lyrics IS NOT NULL AND lyrics != ''
-                """
-            )
-
-        total = len(rows)
-        to_migrate = [r for r in rows if r.id not in migrated_ids]
-        if not to_migrate:
-            return
-
-        migrated = total - len(to_migrate)
-
-        ui.print_(f"Migrating lyrics for {total} {table}...")
-        lyr_fields = ["backend", "url", "language", "translation_language"]
-        for batch in chunks(to_migrate, self.CHUNK_SIZE):
-            lyrics_batch = [Lyrics.from_legacy_text(r.lyrics) for r in batch]
-            ids_with_lyrics = [
-                (lyr, r.id) for lyr, r in zip(lyrics_batch, batch)
-            ]
-            with self.db.transaction() as tx:
-                update_rows = [
-                    (lyr.full_text, r.id)
-                    for lyr, r in zip(lyrics_batch, batch)
-                    if lyr.full_text != r.lyrics
-                ]
-                if update_rows:
-                    tx.mutate_many(
-                        f"UPDATE {table} SET lyrics = ? WHERE id = ?",
-                        update_rows,
-                    )
-
-                # Only insert flex rows for non-null metadata values
-                flex_rows = [
-                    (_id, f"lyrics_{field}", val)
-                    for lyr, _id in ids_with_lyrics
-                    for field in lyr_fields
-                    if (val := getattr(lyr, field)) is not None
-                ]
-                if flex_rows:
-                    tx.mutate_many(
-                        f"""
-                        INSERT INTO {flex_table} (entity_id, key, value)
-                        VALUES (?, ?, ?)
-                        """,
-                        flex_rows,
-                    )
-
-            migrated += len(batch)
-
-            ui.print_(
-                f"  Migrated {migrated} {table} "
-                f"({migrated}/{total} processed)..."
-            )
-
-        ui.print_(f"Migration complete: {migrated} of {total} {table} updated")
+        pass
 
 
 class RelativePathMigration(Migration):
@@ -234,32 +111,9 @@ class RelativePathMigration(Migration):
     db: Library
 
     def _migrate_field(self, model_cls: type[Model], field: str) -> None:
-        table = model_cls._table
-
-        with self.db.transaction() as tx:
-            rows = tx.query(f"SELECT id, {field} FROM {table}")  # type: ignore[assignment]
-
-        total = len(rows)
-        to_migrate = [r for r in rows if r[field] and os.path.isabs(r[field])]
-        if not to_migrate:
-            return
-
-        ui.print_(f"Migrating {field} for {total} {table}...")
-        with self.db.transaction() as tx:
-            tx.mutate_many(
-                f"UPDATE {table} SET {field} = ? WHERE id = ?",
-                [
-                    (normalize_path_for_db(r[field]), r["id"])
-                    for r in to_migrate
-                ],
-            )
-
-        ui.print_(
-            f"Migration complete: {len(to_migrate)} of {total} {table} updated"
-        )
+        pass
 
     def _migrate_data(
         self, model_cls: type[Model], current_fields: set[str]
     ) -> None:
-        for field in {"path", "artpath"} & current_fields:
-            self._migrate_field(model_cls, field)
+        pass

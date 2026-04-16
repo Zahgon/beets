@@ -8,40 +8,7 @@ from beets.util import displayable_path, editor_command, interactive_open
 
 def config_func(lib, opts, args):
     # Make sure lazy configuration is loaded
-    config.resolve()
-
-    # Print paths.
-    if opts.paths:
-        filenames = []
-        for source in config.sources:
-            if not opts.defaults and source.default:
-                continue
-            if source.filename:
-                filenames.append(source.filename)
-
-        # In case the user config file does not exist, prepend it to the
-        # list.
-        user_path = config.user_config_path()
-        if user_path not in filenames:
-            filenames.insert(0, user_path)
-
-        for filename in filenames:
-            ui.print_(displayable_path(filename))
-
-    # Open in editor.
-    elif opts.edit:
-        # Note:  This branch *should* be unreachable
-        # since the normal flow should be short-circuited
-        # by the special case in ui._raw_main
-        config_edit(opts)
-
-    # Dump configuration.
-    else:
-        config_out = config.dump(full=opts.defaults, redact=opts.redact)
-        if config_out.strip() != "{}":
-            ui.print_(config_out)
-        else:
-            print("Empty configuration")
+    pass
 
 
 def config_edit(cli_options):

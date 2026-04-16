@@ -16,7 +16,7 @@ def list_items(lib, query, album, fmt=""):
 
 
 def list_func(lib, opts, args):
-    list_items(lib, args, opts.album)
+    pass
 
 
 list_cmd = ui.Subcommand("list", help="query the library", aliases=("ls",))

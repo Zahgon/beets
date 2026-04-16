@@ -75,16 +75,7 @@ def maybe_handle_plugin_error(plugin: MetadataSourcePlugin, method_name: str):
 def _yield_from_plugins(
     func: Callable[..., Iterable[Ret]],
 ) -> Callable[..., Iterator[Ret]]:
-    method_name = func.__name__
-
-    @wraps(func)
-    def wrapper(*args, **kwargs) -> Iterator[Ret]:
-        for plugin in find_metadata_source_plugins():
-            method = getattr(plugin, method_name)
-            with maybe_handle_plugin_error(plugin, method_name):
-                yield from filter(None, method(*args, **kwargs))
-
-    return wrapper
+    pass
 
 
 @notify_info_yielded("albuminfo_received")
@@ -162,14 +153,11 @@ class MetadataSourcePlugin(BeetsPlugin, metaclass=abc.ABCMeta):
 
         This is inferred from the plugin name.
         """
-        return cls.__name__.replace("Plugin", "")  # type: ignore[attr-defined]
+        pass
 
     @cached_property
     def data_source_mismatch_penalty(self) -> float:
-        try:
-            return self.config["source_weight"].as_number()
-        except NotFoundError:
-            return self.config["data_source_mismatch_penalty"].as_number()
+        pass
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -256,7 +244,7 @@ class MetadataSourcePlugin(BeetsPlugin, metaclass=abc.ABCMeta):
         Uses the plugin's data source name to determine the ID format and
         extracts the ID from a given URL.
         """
-        return extract_release_id(self.data_source, url)
+        pass
 
     @staticmethod
     def get_artist(
@@ -286,25 +274,7 @@ class MetadataSourcePlugin(BeetsPlugin, metaclass=abc.ABCMeta):
             which keeps the default behaviour (comma-separated).
         :return: Normalized artist string.
         """
-        artist_id = None
-        artist_string = ""
-        artists = list(artists)  # In case a generator was passed.
-        total = len(artists)
-        for idx, artist in enumerate(artists):
-            if not artist_id:
-                artist_id = artist[id_key]
-            name = artist[name_key]
-            # Move articles to the front.
-            name = re.sub(r"^(.*?), (a|an|the)$", r"\2 \1", name, flags=re.I)
-            # Use a join keyword if requested and available.
-            if idx < (total - 1):  # Skip joining on last.
-                if join_key and artist.get(join_key, None):
-                    name += f" {artist[join_key]} "
-                else:
-                    name += ", "
-            artist_string += name
-
-        return artist_string, artist_id
+        pass
 
 
 class IDResponse(TypedDict):

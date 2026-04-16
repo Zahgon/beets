@@ -83,7 +83,7 @@ def move_items(
         return item.path != item.destination(basedir=dest)
 
     def isalbummoved(album):
-        return any(isitemmoved(i) for i in album.items())
+        pass
 
     objs = [o for o in objs if (isalbummoved if album else isitemmoved)(o)]
     num_unmoved = num_objs - len(objs)
@@ -147,22 +147,7 @@ def move_items(
 
 
 def move_func(lib, opts, args):
-    dest = opts.dest
-    if dest is not None:
-        dest = normpath(dest)
-        if not os.path.isdir(syspath(dest)):
-            raise ui.UserError(f"no such directory: {displayable_path(dest)}")
-
-    move_items(
-        lib,
-        dest,
-        args,
-        opts.copy,
-        opts.album,
-        opts.pretend,
-        opts.timid,
-        opts.export,
-    )
+    pass
 
 
 move_cmd = ui.Subcommand("move", help="move or copy items", aliases=("mv",))

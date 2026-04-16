@@ -136,7 +136,7 @@ class WriteEvent(WaitableEvent):
         self.data = data
 
     def waitable(self):
-        return (), (self.fd,), ()
+        pass
 
     def fire(self):
         self.fd.write(self.data)
@@ -551,16 +551,14 @@ class SendEvent(WaitableEvent):
 
 def null():
     """Event: yield to the scheduler without doing anything special."""
-    return ValueEvent(None)
+    pass
 
 
 def spawn(coro):
     """Event: add another coroutine to the scheduler. Both the parent
     and child coroutines run concurrently.
     """
-    if not isinstance(coro, types.GeneratorType):
-        raise ValueError(f"{coro} is not a coroutine")
-    return SpawnEvent(coro)
+    pass
 
 
 def call(coro):
@@ -577,7 +575,7 @@ def end(value=None):
     """Event: ends the coroutine and returns a value to its
     delegator.
     """
-    return ReturnEvent(value)
+    pass
 
 
 def read(fd, bufsize=None):
@@ -627,7 +625,7 @@ def join(coro):
 
 def kill(coro):
     """Halt the execution of a different `spawn`ed thread."""
-    return KillEvent(coro)
+    pass
 
 
 # Convenience function for running socket servers.
@@ -639,19 +637,4 @@ def server(host, port, func):
     parameter, a Connection object. The coroutine is invoked for every
     incoming connection on the listening socket.
     """
-
-    def handler(conn):
-        try:
-            yield func(conn)
-        finally:
-            conn.close()
-
-    listener = Listener(host, port)
-    try:
-        while True:
-            conn = yield listener.accept()
-            yield spawn(handler(conn))
-    except KeyboardInterrupt:
-        pass
-    finally:
-        listener.close()
+    pass

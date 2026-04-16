@@ -60,7 +60,7 @@ def _invalidate_queue(q, val=None, sync=True):
     """
 
     def _qsize(len=len):
-        return 1
+        pass
 
     def _put(item):
         pass
@@ -188,14 +188,7 @@ def stage(
     >>> list(pipe.pull())
     [3, 4, 5]
     """
-
-    def coro(*args: Unpack[A]) -> Generator[R | T | None, T, None]:
-        task: R | T | None = None
-        while True:
-            task = yield task
-            task = func(*args, task)
-
-    return coro
+    pass
 
 
 def mutator_stage(func: Callable[[Unpack[A], T], R]):
@@ -212,14 +205,7 @@ def mutator_stage(func: Callable[[Unpack[A], T], R]):
     >>> list(pipe.pull())
     [{'x': True}, {'a': False, 'x': True}]
     """
-
-    def coro(*args: Unpack[A]) -> Generator[T | None, T, None]:
-        task = None
-        while True:
-            task = yield task
-            func(*args, task)
-
-    return coro
+    pass
 
 
 def _allmsgs(obj):

@@ -90,12 +90,7 @@ class ImportSession:
         self.paths = list(map(normpath, paths or []))
 
     def _setup_logging(self, loghandler: logging.Handler | None):
-        logger = logging.getLogger(__name__)
-        logger.propagate = False
-        if not loghandler:
-            loghandler = logging.NullHandler()
-        logger.handlers = [loghandler]
-        return logger
+        pass
 
     def set_config(self, config):
         """Set `config` property from global import config and make
@@ -261,9 +256,7 @@ class ImportSession:
     @property
     def history_dirs(self) -> set[tuple[PathBytes, ...]]:
         # FIXME: This could be simplified to a cached property
-        if self._history_dirs is None:
-            self._history_dirs = ImportState().taghistory
-        return self._history_dirs
+        pass
 
     def already_merged(self, paths: Sequence[PathBytes]):
         """Returns true if all the paths being imported were part of a merge

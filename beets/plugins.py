@@ -129,12 +129,7 @@ class PluginLogFilter(logging.Filter):
         self.prefix = f"{plugin.name}: "
 
     def filter(self, record):
-        if hasattr(record.msg, "msg") and isinstance(record.msg.msg, str):
-            # A _LogMessage from our hacked-up Logging replacement.
-            record.msg.msg = f"{self.prefix}{record.msg.msg}"
-        elif isinstance(record.msg, str):
-            record.msg = f"{self.prefix}{record.msg}"
-        return True
+        pass
 
 
 # Managing the plugins themselves.
@@ -252,26 +247,7 @@ class BeetsPlugin(metaclass=BeetsPluginMeta):
         a third party plugin, thus we raise a deprecation warning which won't be
         shown to user but will be visible to plugin developers.
         """
-        # TODO: Remove in v3.0.0
-        if (
-            not hasattr(self, "data_source")
-            or "source_weight" not in self.config
-        ):
-            return
-
-        for source in self.config.root().sources:
-            if "source_weight" in (source.get(self.name) or {}):
-                if source.filename:  # user config
-                    deprecate_for_user(
-                        self._log,
-                        f"'{self.name}.source_weight' configuration option",
-                        f"'{self.name}.data_source_mismatch_penalty'",
-                    )
-                else:  # 3rd-party plugin config
-                    deprecate_for_maintainers(
-                        "'source_weight' configuration option",
-                        "'data_source_mismatch_penalty'",
-                    )
+        pass
 
     def commands(self) -> Sequence[Subcommand]:
         """Should return a list of beets.ui.Subcommand objects for
@@ -323,18 +299,7 @@ class BeetsPlugin(metaclass=BeetsPluginMeta):
 
         @wraps(func)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> Ret:
-            assert self._log.level == logging.NOTSET
-
-            verbosity = beets.config["verbose"].get(int)
-            log_level = max(logging.DEBUG, base_log_level - 10 * verbosity)
-            self._log.setLevel(log_level)
-            if argspec.varkw is None:
-                kwargs = {k: v for k, v in kwargs.items() if k in argspec.args}  # type: ignore[assignment]
-
-            try:
-                return func(*args, **kwargs)
-            finally:
-                self._log.setLevel(logging.NOTSET)
+            pass
 
         return wrapper
 
@@ -352,19 +317,11 @@ class BeetsPlugin(metaclass=BeetsPluginMeta):
         changes. Similarly ``item.read()`` will set ``item[name]`` to
         the value of the name property of the media file.
         """
-        # Defer import to prevent circular dependency
-        from beets import library
-
-        mediafile.MediaFile.add_field(name, descriptor)
-        library.Item._media_fields.add(name)
+        pass
 
     def register_listener(self, event: EventType, func: Listener) -> None:
         """Add a function as a listener for the specified event."""
-        if func not in self._raw_listeners[event]:
-            self._raw_listeners[event].append(func)
-            self.listeners[event].append(
-                self._set_log_level_and_params(logging.WARNING, func)
-            )
+        pass
 
     @classmethod
     def template_func(cls, name: str) -> Callable[[TFunc[str]], TFunc[str]]:
@@ -372,12 +329,7 @@ class BeetsPlugin(metaclass=BeetsPluginMeta):
         function will be invoked as ``%name{}`` from path format
         strings.
         """
-
-        def helper(func: TFunc[str]) -> TFunc[str]:
-            cls.template_funcs[name] = func
-            return func
-
-        return helper
+        pass
 
     @classmethod
     def template_field(cls, name: str) -> Callable[[TFunc[Item]], TFunc[Item]]:
@@ -386,12 +338,7 @@ class BeetsPlugin(metaclass=BeetsPluginMeta):
         strings. The function must accept a single parameter, the Item
         being formatted.
         """
-
-        def helper(func: TFunc[Item]) -> TFunc[Item]:
-            cls.template_fields[name] = func
-            return func
-
-        return helper
+        pass
 
 
 def get_plugin_names() -> list[str]:
@@ -448,31 +395,7 @@ def _get_plugin(name: str) -> BeetsPlugin | None:
 
     Returns None if the plugin could not be loaded for any reason.
     """
-    try:
-        try:
-            namespace = import_module(f"{PLUGIN_NAMESPACE}.{name}")
-        except Exception as exc:
-            raise PluginImportError(name) from exc
-
-        for obj in reversed(namespace.__dict__.values()):
-            if (
-                inspect.isclass(obj)
-                and issubclass(obj, BeetsPlugin)
-                and obj != BeetsPlugin
-                and not inspect.isabstract(obj)
-                # Only consider this plugin's module or submodules to avoid
-                # conflicts when plugins import other BeetsPlugin classes
-                and (
-                    obj.__module__ == namespace.__name__
-                    or obj.__module__.startswith(f"{namespace.__name__}.")
-                )
-            ):
-                return obj()
-
-    except Exception:
-        log.warning("** error loading plugin {}", name, exc_info=True)
-
-    return None
+    pass
 
 
 _instances: list[BeetsPlugin] = []
@@ -537,12 +460,7 @@ def types(model_cls: type[AnyModel]) -> dict[str, Type]:
 
 def named_queries(model_cls: type[AnyModel]) -> dict[str, FieldQueryType]:
     """Return mapping between field names and queries for the given model."""
-    attr_name = f"{model_cls.__name__.lower()}_queries"
-    return {
-        field: query
-        for plugin in find_plugins()
-        for field, query in getattr(plugin, attr_name, {}).items()
-    }
+    pass
 
 
 def notify_info_yielded(
@@ -559,12 +477,7 @@ def notify_info_yielded(
         func: Callable[P, Iterable[Ret]],
     ) -> Callable[P, Iterator[Ret]]:
         @wraps(func)
-        def wrapper(*args: P.args, **kwargs: P.kwargs) -> Iterator[Ret]:
-            for v in func(*args, **kwargs):
-                send(event, info=v)
-                yield v
-
-        return wrapper
+        pass
 
     return decorator
 
@@ -662,14 +575,7 @@ def feat_tokens(
     The `for_artist` option determines whether the regex should be
     suitable for matching artist fields (the default) or title fields.
     """
-    feat_words = ["ft", "featuring", "feat", "feat.", "ft."]
-    if isinstance(custom_words, list):
-        feat_words += custom_words
-    if for_artist:
-        feat_words += ["with", "vs", "and", "con", "&"]
-    return (
-        rf"(?<=[\s(\[])(?:{'|'.join(re.escape(x) for x in feat_words)})(?=\s)"
-    )
+    pass
 
 
 def apply_item_changes(
@@ -684,16 +590,4 @@ def apply_item_changes(
         metadata.
     :param write: Write the item's metadata to its media file.
     """
-    if pretend:
-        return
-
-    from beets import util
-
-    # Move the item if it's in the library.
-    if move and lib.directory in util.ancestry(item.path):
-        item.move(with_album=False)
-
-    if write:
-        item.try_write()
-
-    item.store()
+    pass

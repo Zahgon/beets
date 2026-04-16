@@ -71,8 +71,7 @@ class M3UFile:
         save-operation writes an m3u-extended playlist (comment "#EXTM3U" at
         the top of the file).
         """
-        self.media_list = media_list
-        self.extm3u = extm3u
+        pass
 
     def write(self):
         """Writes the m3u file to disk.

@@ -88,7 +88,7 @@ class Query(ABC):
     @property
     def field_names(self) -> set[str]:
         """Return a set with field names that this query operates on."""
-        return set()
+        pass
 
     @abstractmethod
     def clause(self) -> tuple[str | None, Sequence[Any]]:
@@ -148,7 +148,7 @@ class FieldQuery(Query, Generic[P]):
     @property
     def field_names(self) -> set[str]:
         """Return a set with field names that this query operates on."""
-        return {self.field_name}
+        pass
 
     def __init__(self, field_name: str, pattern: P, fast: bool = True):
         self.table, _, self.field_name = field_name.rpartition(".")
@@ -320,7 +320,7 @@ class PathQuery(FieldQuery[bytes]):
 
     @cached_property
     def dir_path(self) -> bytes:
-        return os.path.join(self.pattern, b"")
+        pass
 
     @staticmethod
     def is_path_query(query_part: str) -> bool:
@@ -512,7 +512,7 @@ class InQuery(Generic[AnySQLiteType], FieldQuery[Sequence[AnySQLiteType]]):
 
     @property
     def subvals(self) -> Sequence[SQLiteType]:
-        return self.pattern
+        pass
 
     def col_clause(self) -> tuple[str, Sequence[SQLiteType]]:
         placeholders = ", ".join(["?"] * len(self.subvals))
@@ -533,7 +533,7 @@ class CollectionQuery(Query):
     @property
     def field_names(self) -> set[str]:
         """Return a set with field names that this query operates on."""
-        return reduce(or_, (sq.field_names for sq in self.subqueries))
+        pass
 
     def __init__(self, subqueries: Sequence[Query] = ()):
         self.subqueries = subqueries
@@ -626,7 +626,7 @@ class NotQuery(Query):
     @property
     def field_names(self) -> set[str]:
         """Return a set with field names that this query operates on."""
-        return self.subquery.field_names
+        pass
 
     def __init__(self, subquery):
         self.subquery = subquery
@@ -790,25 +790,7 @@ class Period:
         """Based on the precision, convert the period to a precise
         `datetime` for use as a right endpoint in a right-open interval.
         """
-        precision = self.precision
-        date = self.date
-        if "year" == self.precision:
-            return date.replace(year=date.year + 1, month=1)
-        elif "month" == precision:
-            if date.month < 12:
-                return date.replace(month=date.month + 1)
-            else:
-                return date.replace(year=date.year + 1, month=1)
-        elif "day" == precision:
-            return date + timedelta(days=1)
-        elif "hour" == precision:
-            return date + timedelta(hours=1)
-        elif "minute" == precision:
-            return date + timedelta(minutes=1)
-        elif "second" == precision:
-            return date + timedelta(seconds=1)
-        else:
-            raise ValueError(f"unhandled precision {precision}")
+        pass
 
 
 class DateInterval:
@@ -831,9 +813,7 @@ class DateInterval:
         end: Period | None,
     ) -> DateInterval:
         """Create an interval with two Periods as the endpoints."""
-        end_date = end.open_right_endpoint() if end is not None else None
-        start_date = start.date if start is not None else None
-        return cls(start_date, end_date)
+        pass
 
     def contains(self, date: datetime) -> bool:
         if self.start is not None and date < self.start:
@@ -1051,17 +1031,7 @@ class FieldSort(Sort):
         # attributes with different types without falling over.
 
         def key(obj: Model) -> Any:
-            field_val = obj.get(self.field, None)
-            if field_val is None:
-                if _type := obj._types.get(self.field):
-                    # If the field is typed, use its null value.
-                    field_val = obj._types[self.field].null
-                else:
-                    # If not, fall back to using an empty string.
-                    field_val = ""
-            if self.case_insensitive and isinstance(field_val, str):
-                field_val = field_val.lower()
-            return field_val
+            pass
 
         return sorted(objs, key=key, reverse=not self.ascending)
 
@@ -1141,7 +1111,6 @@ class SmartArtistSort(FieldSort):
 
     def sort(self, objs: list[AnyModel]) -> list[AnyModel]:
         def key(o):
-            val = o[f"{self.field}_sort"] or o[self.field]
-            return val.lower() if self.case_insensitive else val
+            pass
 
         return sorted(objs, key=key, reverse=not self.ascending)

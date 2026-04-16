@@ -80,24 +80,13 @@ class Type(ABC, Generic[T, N]):
     @property
     def null(self) -> N:
         """The value to be exposed when the underlying value is None."""
-        # Note that this default implementation only makes sense for T = N.
-        # It would be better to implement `null()` only in subclasses, or
-        # have a field null_type similar to `model_type` and use that here.
-        return cast(N, self.model_type())
+        pass
 
     def format(self, value: N | T) -> str:
         """Given a value of this type, produce a Unicode string
         representing the value. This is used in template evaluation.
         """
-        if value is None:
-            value = self.null
-        # `self.null` might be `None`
-        if value is None:
-            return ""
-        elif isinstance(value, bytes):
-            return value.decode("utf-8", "ignore")
-        else:
-            return str(value)
+        pass
 
     def parse(self, string: str) -> T | N:
         """Parse a (possibly human-written) string and return the
@@ -157,7 +146,7 @@ class Default(Type[str, None]):
 
     @property
     def null(self):
-        return None
+        pass
 
 
 class BaseInteger(Type[int, N]):
@@ -179,13 +168,13 @@ class BaseInteger(Type[int, N]):
 class Integer(BaseInteger[int]):
     @property
     def null(self) -> int:
-        return 0
+        pass
 
 
 class NullInteger(BaseInteger[None]):
     @property
     def null(self) -> None:
-        return None
+        pass
 
 
 class BasePaddedInt(BaseInteger[N]):
@@ -197,7 +186,7 @@ class BasePaddedInt(BaseInteger[N]):
         self.digits = digits
 
     def format(self, value: int | N) -> str:
-        return f"{value or 0:0{self.digits}d}"
+        pass
 
 
 class PaddedInt(BasePaddedInt[int]):
@@ -214,7 +203,7 @@ class ScaledInt(Integer):
         self.suffix = suffix
 
     def format(self, value: int) -> str:
-        return f"{(value or 0) // self.unit}{self.suffix}"
+        pass
 
 
 class Id(NullInteger):
@@ -224,7 +213,7 @@ class Id(NullInteger):
 
     @property
     def null(self) -> None:
-        return None
+        pass
 
     def __init__(self, primary: bool = True):
         if primary:
@@ -244,7 +233,7 @@ class BaseFloat(Type[float, N]):
         self.digits = digits
 
     def format(self, value: float | N) -> str:
-        return f"{value or 0:.{self.digits}f}"
+        pass
 
 
 class Float(BaseFloat[float]):
@@ -252,7 +241,7 @@ class Float(BaseFloat[float]):
 
     @property
     def null(self) -> float:
-        return 0.0
+        pass
 
 
 class NullFloat(BaseFloat[None]):
@@ -260,7 +249,7 @@ class NullFloat(BaseFloat[None]):
 
     @property
     def null(self) -> None:
-        return None
+        pass
 
 
 class BaseString(Type[T, N]):
@@ -299,7 +288,7 @@ class DelimitedString(BaseString[list, list]):  # type: ignore[type-arg]
         self.db_delimiter = db_delimiter
 
     def format(self, value: list[str]):
-        return self.fmt_delimiter.join(value)
+        pass
 
     def parse(self, string: str):
         if not string:
@@ -345,7 +334,7 @@ class Boolean(Type):
     model_type = bool
 
     def format(self, value: bool) -> str:
-        return str(bool(value))
+        pass
 
     def parse(self, string: str) -> bool:
         return util.str2bool(string)
@@ -357,9 +346,7 @@ class DateType(Float):
     query = query.DateQuery
 
     def format(self, value):
-        return time.strftime(
-            beets.config["time_format"].as_str(), time.localtime(value or 0)
-        )
+        pass
 
     def parse(self, string):
         try:
@@ -414,19 +401,19 @@ class BasePathType(Type[bytes, N]):
 class NullPathType(BasePathType[None]):
     @property
     def null(self) -> None:
-        return None
+        pass
 
     def format(self, value: bytes | None) -> str:
-        return util.displayable_path(value or b"")
+        pass
 
 
 class PathType(BasePathType[bytes]):
     @property
     def null(self) -> bytes:
-        return b""
+        pass
 
     def format(self, value: bytes) -> str:
-        return util.displayable_path(value or b"")
+        pass
 
 
 class MusicalKey(String):
@@ -466,10 +453,7 @@ class DurationType(Float):
     query = query.DurationQuery
 
     def format(self, value):
-        if not beets.config["format_raw_length"].get(bool):
-            return human_seconds_short(value or 0.0)
-        else:
-            return value
+        pass
 
     def parse(self, string):
         try:

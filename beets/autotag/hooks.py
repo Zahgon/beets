@@ -145,7 +145,7 @@ class Info(AttrDict[Any]):
     @cached_classproperty
     def nullable_fields(cls) -> set[str]:
         """Return fields that may be cleared when new metadata is applied."""
-        return set(config["overwrite_null"][cls.type.lower()].as_str_seq())
+        pass
 
     def __setitem__(self, key: str, value: Any) -> None:
         # handle legacy info.str_field = "abc" and info["str_field"] = "abc"
@@ -164,7 +164,7 @@ class Info(AttrDict[Any]):
     @property
     def identifier(self) -> Identifier:
         """Return a cross-provider key in ``(data_source, id)`` form."""
-        return (self.data_source, self.id)
+        pass
 
     @cached_property
     def name(self) -> str:
@@ -173,14 +173,7 @@ class Info(AttrDict[Any]):
     @cached_property
     def raw_data(self) -> JSONDict:
         """Provide metadata with artist credits applied when configured."""
-        data = self.__class__(**self.copy())
-        if config["artist_credit"]:
-            data.update(
-                artist=self.artist_credit or self.artist,
-                artists=self.artists_credit or self.artists,
-            )
-
-        return correct_list_fields(data)
+        pass
 
     @cached_property
     def item_data(self) -> JSONDict:
@@ -190,18 +183,7 @@ class Info(AttrDict[Any]):
         fields, removes ignored fields, and applies media-specific field name
         mappings for compatibility with the item model.
         """
-        data = {
-            k: v
-            for k, v in self.raw_data.items()
-            if k not in self.IGNORED_FIELDS
-            and (v not in [None, []] or k in self.nullable_fields)
-        }
-        for info_field, media_field in (
-            (k, v) for k, v in self.MEDIA_FIELD_MAP.items() if k in data
-        ):
-            data[media_field] = data.pop(info_field)
-
-        return data
+        pass
 
     def __init__(
         self,
@@ -242,21 +224,7 @@ class Info(AttrDict[Any]):
         str_value: str | None,
         list_value: list[str] | None,
     ) -> list[str] | None:
-        if str_value is not None:
-            deprecate_for_maintainers(
-                f"The '{str_field}' field",
-                f"'{list_field}' (list)",
-                stacklevel=3,
-            )
-            if not list_value:
-                try:
-                    sep = next(s for s in ["; ", ", ", " / "] if s in str_value)
-                except StopIteration:
-                    list_value = [str_value]
-                else:
-                    list_value = list(map(str.strip, str_value.split(sep)))
-
-        return list_value
+        pass
 
 
 class AlbumInfo(Info):
@@ -289,21 +257,16 @@ class AlbumInfo(Info):
 
     @property
     def id(self) -> str | None:
-        return self.album_id
+        pass
 
     @cached_property
     def name(self) -> str:
-        return self.album or ""
+        pass
 
     @cached_property
     def raw_data(self) -> JSONDict:
         """Metadata with month and day reset to 0 when only year is present."""
-        data = {**super().raw_data}
-        if data["year"]:
-            data["month"] = self.month or 0
-            data["day"] = self.day or 0
-
-        return data
+        pass
 
     def __init__(
         self,
@@ -397,33 +360,16 @@ class TrackInfo(Info):
 
     @property
     def id(self) -> str | None:
-        return self.track_id
+        pass
 
     @cached_property
     def name(self) -> str:
-        return self.title or ""
+        pass
 
     @cached_property
     def raw_data(self) -> JSONDict:
         """Provide track metadata with numbering adapted to import settings."""
-        data = {
-            **super().raw_data,
-            "mb_releasetrackid": self.release_track_id or self.track_id,
-            "track": self.index,
-            "medium_index": (
-                (
-                    mindex
-                    if (mindex := self.medium_index) is not None
-                    else self.index
-                )
-                if config["per_disc_numbering"]
-                else self.index
-            ),
-        }
-        if config["per_disc_numbering"] and self.medium_total is not None:
-            data["tracktotal"] = self.medium_total
-
-        return data
+        pass
 
     def __init__(
         self,
@@ -488,33 +434,7 @@ class TrackInfo(Info):
         to fill missing track fields while preserving track-specific artist
         credits.
         """
-        album = album_info.raw_data
-        raw_track = self.raw_data
-        track = self.__class__(**self.copy())
-
-        # Do not inherit album artist_credit onto tracks. When artist_credit
-        # mode is enabled, raw_data() uses artist_credit to rewrite artist, and
-        # inheriting the album credit here would override albumartist fallback
-        # for tracks that have no track-level credit.
-        for k in raw_track.keys() - {"artist_credit"}:
-            if not raw_track[k] and (v := album.get(k)):
-                track[k] = v
-
-        merged = (
-            album_info.item_data
-            | {"tracktotal": len(album_info.tracks)}
-            | track.item_data
-        )
-
-        # When configured, prefer original release date over album date.
-        # This keeps logic local and simple; no need to change AlbumInfo.
-        if config["original_date"].get(bool) and (
-            original_year := merged.get("original_year")
-        ):
-            merged["year"] = original_year
-            merged["month"] = merged.get("original_month") or 0
-            merged["day"] = merged.get("original_day") or 0
-        return merged
+        pass
 
 
 # Structures that compose all the information for a candidate match.
@@ -533,28 +453,21 @@ class Match:
 
     @cached_property
     def type(self) -> str:
-        return self.info.type
+        pass
 
     @cached_property
     def from_scratch(self) -> bool:
-        return bool(config["import"]["from_scratch"])
+        pass
 
     @property
     def disambig_fields(self) -> Sequence[str]:
         """Return configured disambiguation fields that exist on this match."""
-        chosen_fields = config["match"][self.disambig_fields_key].as_str_seq()
-        valid_fields = [f for f in chosen_fields if f in self.info]
-        if missing_fields := set(chosen_fields) - set(valid_fields):
-            log.warning(
-                "Disambiguation string keys {} do not exist.", missing_fields
-            )
-
-        return valid_fields
+        pass
 
     @property
     def base_disambig_data(self) -> JSONDict:
         """Return supplemental values used when formatting disambiguation."""
-        return {}
+        pass
 
     @property
     def disambig_string(self) -> str:
@@ -563,10 +476,7 @@ class Match:
         Merges base disambiguation data with instance-specific field values,
         then formats them as a comma-separated string in field definition order.
         """
-        data = {
-            k: self.info[k] for k in self.disambig_fields
-        } | self.base_disambig_data
-        return ", ".join(str(data[k]) for k in self.disambig_fields)
+        pass
 
 
 @dataclass
@@ -587,7 +497,7 @@ class AlbumMatch(Match):
     @property
     def item_info_pairs(self) -> list[tuple[Item, TrackInfo]]:
         """Return matched items together with their selected track metadata."""
-        return list(self.mapping.items())
+        pass
 
     @property
     def items(self) -> list[Item]:
@@ -597,21 +507,12 @@ class AlbumMatch(Match):
     @property
     def base_disambig_data(self) -> JSONDict:
         """Return album-specific values used in disambiguation displays."""
-        return {
-            "media": (
-                f"{mediums}x{self.info.media}"
-                if (mediums := self.info.mediums) and mediums > 1
-                else self.info.media
-            ),
-        }
+        pass
 
     @property
     def merged_pairs(self) -> list[tuple[Item, JSONDict]]:
         """Generate item-data pairs with album-level fallback values."""
-        return [
-            (i, ti.merge_with_album(self.info))
-            for i, ti in self.item_info_pairs
-        ]
+        pass
 
     def apply_metadata(self) -> None:
         """Apply metadata to each of the items."""
@@ -638,18 +539,7 @@ class TrackMatch(Match):
     @property
     def base_disambig_data(self) -> JSONDict:
         """Return singleton-specific values used in disambiguation displays."""
-        return {
-            "index": f"Index {self.info.index}",
-            "track_alt": f"Track {self.info.track_alt}",
-            "album": (
-                f"[{self.info.album}]"
-                if (
-                    config["import"]["singleton_album_disambig"].get()
-                    and self.info.album
-                )
-                else ""
-            ),
-        }
+        pass
 
     def apply_metadata(self) -> None:
         """Apply metadata to the item."""

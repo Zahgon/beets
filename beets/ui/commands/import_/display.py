@@ -38,11 +38,11 @@ class ChangeRepresentation:
 
     @cached_property
     def changed_prefix(self) -> str:
-        return colorize("changed", "\u2260")
+        pass
 
     @cached_property
     def _indentation_config(self) -> confuse.Subview:
-        return config["ui"]["import"]["indentation"]
+        pass
 
     @cached_property
     def indent(self) -> int:
@@ -50,15 +50,15 @@ class ChangeRepresentation:
 
     @cached_property
     def indent_header(self) -> str:
-        return indent(self.indent)
+        pass
 
     @cached_property
     def indent_detail(self) -> str:
-        return indent(self._indentation_config["match_details"].get(int))
+        pass
 
     @cached_property
     def indent_tracklist(self) -> str:
-        return indent(self._indentation_config["match_tracklist"].get(int))
+        pass
 
     def print_layout(self, indent: str, left: Side, right: Side) -> None:
         for line in get_layout_lines(indent, left, right, ui.term_width()):

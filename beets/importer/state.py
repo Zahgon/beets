@@ -76,31 +76,10 @@ class ImportState:
     def _open(
         self,
     ):
-        try:
-            with open(self.path, "rb") as f:
-                state = pickle.load(f)
-                # Read the states
-                self.tagprogress = state.get("tagprogress", {})
-                self.taghistory = state.get("taghistory", set())
-        except Exception as exc:
-            # The `pickle` module can emit all sorts of exceptions during
-            # unpickling, including ImportError. We use a catch-all
-            # exception to avoid enumerating them all (the docs don't even have a
-            # full list!).
-            log.debug("state file could not be read: {}", exc)
+        pass
 
     def _save(self):
-        try:
-            with open(self.path, "wb") as f:
-                pickle.dump(
-                    {
-                        "tagprogress": self.tagprogress,
-                        "taghistory": self.taghistory,
-                    },
-                    f,
-                )
-        except OSError as exc:
-            log.error("state file could not be written: {}", exc)
+        pass
 
     # -------------------------------- Tagprogress ------------------------------- #
 

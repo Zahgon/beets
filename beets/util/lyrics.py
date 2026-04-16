@@ -68,32 +68,17 @@ class Lyrics:
     @classmethod
     def from_legacy_text(cls, text: str) -> Lyrics:
         """Build lyrics from legacy text that may include an inline source."""
-        data: dict[str, Any] = {}
-        data["text"], *suffix = text.split("\n\nSource: ")
-        if suffix:
-            url = suffix[0].strip()
-            url_root = urlparse(url).netloc.removeprefix("www.").split(".")[0]
-            data.update(
-                url=url,
-                backend=url_root if url_root in BACKEND_NAMES else "google",
-            )
-
-        return cls(**data)
+        pass
 
     @classmethod
     def from_item(cls, item: Item) -> Lyrics:
         """Build lyrics from an item's canonical text and flexible metadata."""
-        data = {"text": item.lyrics}
-        for key in ("backend", "url", "language", "translation_language"):
-            data[key] = item.get(f"lyrics_{key}", with_album=False)
-
-        return cls(**data)
+        pass
 
     @cached_property
     def original_text(self) -> str:
         """Return the original text without translations."""
-        # Remove translations from the lyrics text.
-        return self.TRANSLATION_PAT.sub("", self.text).strip()
+        pass
 
     @cached_property
     def _split_lines(self) -> list[tuple[str, str]]:
@@ -102,42 +87,29 @@ class Lyrics:
         Timestamps, when present, are kept separate so callers can translate or
         normalize text without losing synced timing information.
         """
-        return [
-            (m[1], m[2]) if (m := self.LINE_PARTS_PAT.match(line)) else ("", "")
-            for line in self.text.splitlines()
-        ]
+        pass
 
     @cached_property
     def timestamps(self) -> list[str]:
         """Return per-line timestamp prefixes from the lyrics text."""
-        return [ts for ts, _ in self._split_lines]
+        pass
 
     @cached_property
     def text_lines(self) -> list[str]:
         """Return per-line lyric text with timestamps removed."""
-        return [ln for _, ln in self._split_lines]
+        pass
 
     @property
     def synced(self) -> bool:
         """Return whether the lyrics contain synced timestamp markers."""
-        return any(self.timestamps)
+        pass
 
     @property
     def translated(self) -> bool:
         """Return whether translation metadata is available."""
-        return bool(self.translation_language)
+        pass
 
     @property
     def full_text(self) -> str:
         """Return canonical text with translations merged when available."""
-        if not self.translations:
-            return self.text
-
-        text_pairs = list(zip(self.text_lines, self.translations))
-
-        # only add the separator for non-empty and differing translations
-        texts = [" / ".join(unique_list(filter(None, p))) for p in text_pairs]
-        # only add the space between non-empty timestamps and texts
-        return "\n".join(
-            " ".join(filter(None, p)) for p in zip(self.timestamps, texts)
-        )
+        pass

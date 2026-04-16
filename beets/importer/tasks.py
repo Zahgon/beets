@@ -222,7 +222,7 @@ class ImportTask(BaseImportTask):
 
     @property
     def apply(self):
-        return self.choice_flag == Action.APPLY
+        pass
 
     @property
     def skip(self):
@@ -818,13 +818,7 @@ class ArchiveImportTask(SentinelImportTask):
         """Returns true if the given path points to an archive that can
         be handled.
         """
-        if not os.path.isfile(path):
-            return False
-
-        for path_test, _ in cls.handlers:
-            if path_test(os.fsdecode(path)):
-                return True
-        return False
+        pass
 
     @util.cached_classproperty
     def handlers(cls) -> list[ArchiveHandler]:
@@ -835,27 +829,7 @@ class ArchiveImportTask(SentinelImportTask):
         handled by `ArchiveClass`. `ArchiveClass` is a class that
         implements the same interface as `tarfile.TarFile`.
         """
-        _handlers: list[ArchiveHandler] = []
-        from zipfile import ZipFile, is_zipfile
-
-        _handlers.append((is_zipfile, ZipFile))
-        import tarfile
-
-        _handlers.append((tarfile.is_tarfile, tarfile.open))
-        try:
-            from rarfile import RarFile, is_rarfile
-        except ImportError:
-            pass
-        else:
-            _handlers.append((is_rarfile, RarFile))
-        try:
-            from py7zr import SevenZipFile, is_7zfile
-        except ImportError:
-            pass
-        else:
-            _handlers.append((is_7zfile, SevenZipFile))
-
-        return _handlers
+        pass
 
     def cleanup(self, copy=False, delete=False, move=False):
         """Removes the temporary directory the archive was extracted to."""

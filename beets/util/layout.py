@@ -32,22 +32,22 @@ class Side(NamedTuple):
     @property
     def rendered(self) -> str:
         """Assemble the full display string by joining prefix, contents, and suffix."""
-        return f"{self.prefix}{self.contents}{self.suffix}"
+        pass
 
     @property
     def prefix_width(self) -> int:
         """Visible character width of the prefix, excluding color codes."""
-        return color_len(self.prefix)
+        pass
 
     @property
     def suffix_width(self) -> int:
         """Visible character width of the suffix, excluding color codes."""
-        return color_len(self.suffix)
+        pass
 
     @property
     def rendered_width(self) -> int:
         """Visible character width of the fully assembled string."""
-        return color_len(self.rendered)
+        pass
 
 
 def indent(count: int) -> str:
@@ -199,98 +199,7 @@ def get_column_layout(
     With subsequent lines (i.e. {lhs1}, {rhs1} onwards) being the
     rest of contents, wrapped if the width would be otherwise exceeded.
     """
-    if left.width == -1 or right.width == -1:
-        # If widths have not been defined, set to share space.
-        width = (max_width - len(indent_str) - len(separator)) // 2
-        left = left._replace(width=width)
-        right = right._replace(width=width)
-    # On the first line, account for suffix as well as prefix
-    left_width_without_prefix = left.width - left.prefix_width
-    left_split = split_into_lines(
-        left.contents,
-        left_width_without_prefix - left.suffix_width,
-        left_width_without_prefix,
-    )
-
-    right_width_without_prefix = right.width - right.prefix_width
-    right_split = split_into_lines(
-        right.contents,
-        right_width_without_prefix - right.suffix_width,
-        right_width_without_prefix,
-    )
-
-    max_line_count = max(len(left_split), len(right_split))
-
-    out = ""
-    for i in range(max_line_count):
-        # indentation
-        out += indent_str
-
-        # Prefix or indent_str for line
-        if i == 0:
-            out += left.prefix
-        else:
-            out += indent(left.prefix_width)
-
-        # Line i of left hand side contents.
-        if i < len(left_split):
-            out += left_split[i]
-            left_part_len = color_len(left_split[i])
-        else:
-            left_part_len = 0
-
-        # Padding until end of column.
-        # Note: differs from original
-        # column calcs in not -1 afterwards for space
-        # in track number as that is included in 'prefix'
-        padding = left.width - left.prefix_width - left_part_len
-
-        # Remove some padding on the first line to display
-        # length
-        if i == 0:
-            padding -= left.suffix_width
-
-        out += indent(padding)
-
-        if i == 0:
-            out += left.suffix
-
-        # Separator between columns.
-        if i == 0:
-            out += separator
-        else:
-            out += indent(len(separator))
-
-        # Right prefix, contents, padding, suffix
-        if i == 0:
-            out += right.prefix
-        else:
-            out += indent(right.prefix_width)
-
-        # Line i of right hand side.
-        if i < len(right_split):
-            out += right_split[i]
-            right_part_len = color_len(right_split[i])
-        else:
-            right_part_len = 0
-
-        # Padding until end of column
-        padding = right.width - right.prefix_width - right_part_len
-        # Remove some padding on the first line to display
-        # length
-        if i == 0:
-            padding -= right.suffix_width
-        out += indent(padding)
-        # Length in first line
-        if i == 0:
-            out += right.suffix
-
-        # Linebreak, except in the last line.
-        if i < max_line_count - 1:
-            out += "\n"
-
-    # Constructed all of the columns, now print
-    yield out
+    pass
 
 
 def get_newline_layout(
@@ -313,31 +222,7 @@ def get_newline_layout(
     If {lhs0} would go over the maximum width, the subsequent lines are
     indented a second time for ease of reading.
     """
-    width_without_prefix = max_width - len(indent_str)
-    width_without_double_prefix = max_width - 2 * len(indent_str)
-    # On lower lines we will double the indent for clarity
-    left_split = split_into_lines(
-        left.rendered,
-        width_without_prefix,
-        width_without_double_prefix,
-    )
-    # Repeat calculations for rhs, including separator on first line
-    right_split = split_into_lines(
-        right.rendered,
-        width_without_prefix - len(separator),
-        width_without_double_prefix,
-    )
-    for i, line in enumerate(left_split):
-        if i == 0:
-            yield f"{indent_str}{line}"
-        elif line != "":
-            # Ignore empty lines
-            yield f"{indent_str * 2}{line}"
-    for i, line in enumerate(right_split):
-        if i == 0:
-            yield f"{indent_str}{separator}{line}"
-        elif line != "":
-            yield f"{indent_str * 2}{line}"
+    pass
 
 
 def get_layout_method() -> Callable[[str, Side, Side, int, str], Iterator[str]]:

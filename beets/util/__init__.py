@@ -95,22 +95,11 @@ class HumanReadableError(Exception):
 
     def _gerund(self):
         """Generate a (likely) gerund form of the English verb."""
-        if " " in self.verb:
-            return self.verb
-        gerund = self.verb[:-1] if self.verb.endswith("e") else self.verb
-        gerund += "ing"
-        return gerund
+        pass
 
     def _reasonstr(self):
         """Get the reason as a string."""
-        if isinstance(self.reason, str):
-            return self.reason
-        elif isinstance(self.reason, bytes):
-            return self.reason.decode("utf-8", "ignore")
-        elif hasattr(self.reason, "strerror"):  # i.e., EnvironmentError
-            return self.reason.strerror
-        else:
-            return f'"{self.reason}"'
+        pass
 
     def get_message(self):
         """Create the human-readable description of the error, sans
@@ -139,20 +128,7 @@ class FilesystemError(HumanReadableError):
 
     def get_message(self):
         # Use a nicer English phrasing for some specific verbs.
-        if self.verb in ("move", "copy", "rename"):
-            clause = (
-                f"while {self._gerund()} {displayable_path(self.paths[0])} to"
-                f" {displayable_path(self.paths[1])}"
-            )
-        elif self.verb in ("delete", "write", "create", "read"):
-            clause = f"while {self._gerund()} {displayable_path(self.paths[0])}"
-        else:
-            clause = (
-                f"during {self.verb} of paths"
-                f" {', '.join(displayable_path(p) for p in self.paths)}"
-            )
-
-        return f"{self._reasonstr()} {clause}"
+        pass
 
 
 class MoveOperation(Enum):
@@ -986,42 +962,7 @@ def case_sensitive(path: bytes) -> bool:
     Currently only used for absolute paths by beets; may have a trailing
     path separator.
     """
-    # Look at parent paths until we find a path that actually exists, or
-    # reach the root.
-    while True:
-        head, tail = os.path.split(path)
-        if head == path:
-            # We have reached the root of the file system.
-            # By default, the case sensitivity depends on the platform.
-            return platform.system() != "Windows"
-
-        # Trailing path separator, or path does not exist.
-        if not tail or not os.path.exists(path):
-            path = head
-            continue
-
-        upper_tail = tail.upper()
-        lower_tail = tail.lower()
-
-        # In case we can't tell from the given path name, look at the
-        # parent directory.
-        if upper_tail == lower_tail:
-            path = head
-            continue
-
-        upper_sys = syspath(os.path.join(head, upper_tail))
-        lower_sys = syspath(os.path.join(head, lower_tail))
-
-        # If either the upper-cased or lower-cased path does not exist, the
-        # filesystem must be case-sensitive.
-        # (Otherwise, we have more work to do.)
-        if not os.path.exists(upper_sys) or not os.path.exists(lower_sys):
-            return True
-
-        # Original and both upper- and lower-cased versions of the path
-        # exist on the file system. Check whether they refer to different
-        # files by their inodes (or an alternative method on Windows).
-        return not os.path.samefile(lower_sys, upper_sys)
+    pass
 
 
 def asciify_path(path: str, sep_replace: str) -> str:
@@ -1054,15 +995,7 @@ def par_map(transform: Callable[[T], Any], items: Sequence[T]) -> None:
     ensuring that context-dependent state is available during parallel
     execution.
     """
-    ctx = contextvars.copy_context()  # snapshot parent context at call time
-
-    def _worker(item: T) -> Any:
-        # ThreadPool workers may run concurrently, so each task needs its own
-        # child context rather than sharing one Context instance.
-        return ctx.copy().run(transform, item)
-
-    with ThreadPool() as pool:
-        pool.map(_worker, items)
+    pass
 
 
 class cached_classproperty(Generic[T]):

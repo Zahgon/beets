@@ -135,18 +135,11 @@ class Distance:
     @cached_classproperty
     def _weights(cls) -> dict[str, float]:
         """A dictionary from keys to floating-point weights."""
-        weights_view = config["match"]["distance_weights"]
-        weights = {}
-        for key in weights_view.keys():
-            weights[key] = weights_view[key].as_number()
-        return weights
+        pass
 
     @property
     def generic_penalty_keys(self) -> list[str]:
-        return [
-            k.replace("album_", "").replace("track_", "").replace("_", " ")
-            for k in self._penalties
-        ]
+        pass
 
     # Access the components and their aggregates.
 
@@ -163,30 +156,20 @@ class Distance:
     @property
     def max_distance(self) -> float:
         """Return the maximum distance penalty (normalization factor)."""
-        dist_max = 0.0
-        for key, penalty in self._penalties.items():
-            dist_max += len(penalty) * self._weights[key]
-        return dist_max
+        pass
 
     @property
     def raw_distance(self) -> float:
         """Return the raw (denormalized) distance."""
-        dist_raw = 0.0
-        for key, penalty in self._penalties.items():
-            dist_raw += sum(penalty) * self._weights[key]
-        return dist_raw
+        pass
 
     @property
     def color(self) -> ColorName:
-        if self.distance <= config["match"]["strong_rec_thresh"].as_number():
-            return "text_success"
-        if self.distance <= config["match"]["medium_rec_thresh"].as_number():
-            return "text_warning"
-        return "text_error"
+        pass
 
     @property
     def string(self) -> str:
-        return colorize(self.color, f"{(1 - self.distance) * 100:.1f}%")
+        pass
 
     def items(self) -> list[tuple[str, float]]:
         """Return a list of (key, dist) pairs, with `dist` being the

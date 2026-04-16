@@ -55,8 +55,7 @@ class Library(dbcore.Database):
     @contextmanager
     def music_dir_context(self):
         """Temporarily bind this library's directory to path conversion."""
-        with context.music_dir(self.directory):
-            yield self
+        pass
 
     # Adding objects to the database.
 

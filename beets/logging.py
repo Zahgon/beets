@@ -85,21 +85,7 @@ def _logsafe(val: T) -> str | T:
     explicitly uses `displayable_path` for them, but better be safe and prevent
     any crashes that are solely due to log formatting.
     """
-    # Bytestring: Needs decoding to be safe for substitution in format strings.
-    if isinstance(val, bytes):
-        # Blindly convert with UTF-8. Eventually, it would be nice to
-        # (a) only do this for paths, if they can be given a distinct
-        # type, and (b) warn the developer if they do this for other
-        # bytestrings.
-        return val.decode("utf-8", "replace")
-    if isinstance(val, str):
-        # Sanitize log messages by replacing control characters that can disrupt
-        # terminals.
-        return _CONTROL_CHAR_REGEX.sub(_UNICODE_REPLACEMENT_CHARACTER, val)
-
-    # Other objects are used as-is so field access, etc., still works in
-    # the format string. Relies on a working __str__ implementation.
-    return val
+    pass
 
 
 class StrFormatLogger(Logger):
@@ -142,19 +128,7 @@ class StrFormatLogger(Logger):
         **kwargs,
     ):
         """Log msg.format(*args, **kwargs)"""
-
-        if isinstance(msg, str):
-            msg = self._LogMessage(msg, args, kwargs)
-
-        return super()._log(
-            level,
-            msg,
-            (),
-            exc_info=exc_info,
-            extra=extra,
-            stack_info=stack_info,
-            stacklevel=stacklevel,
-        )
+        pass
 
 
 class ThreadLocalLevelLogger(Logger):
@@ -167,15 +141,11 @@ class ThreadLocalLevelLogger(Logger):
 
     @property
     def level(self):
-        try:
-            return self._thread_level.level
-        except AttributeError:
-            self._thread_level.level = self.default_level
-            return self.level
+        pass
 
     @level.setter
     def level(self, value):
-        self._thread_level.level = value
+        pass
 
     def set_global_level(self, level):
         """Set the level on the current thread + the default value for all
@@ -194,11 +164,7 @@ class BeetsLogger(ThreadLocalLevelLogger, StrFormatLogger):
         Intended for high-verbosity tuning/diagnostic messages that would be too
         noisy at normal debug level.
         """
-        # Lazy import to avoid circular dependency (beets.__init__ -> beets.logging)
-        from beets import config
-
-        if config["verbose"].as_number() >= 3:
-            self._log(DEBUG, msg, args, **kwargs)
+        pass
 
 
 my_manager = copy(Logger.manager)

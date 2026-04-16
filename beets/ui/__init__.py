@@ -79,7 +79,7 @@ class UserError(Exception):
 
 def _in_encoding():
     """Get the encoding to use for *inputting* strings from the console."""
-    return _stream_encoding(sys.stdin)
+    pass
 
 
 def _out_encoding():
@@ -115,8 +115,7 @@ def decargs(arglist):
     .. deprecated:: 2.4.0
        This function will be removed in 3.0.0.
     """
-    deprecate_for_maintainers("'beets.ui.decargs'")
-    return arglist
+    pass
 
 
 def print_(*strings: str, end: str = "\n") -> None:
@@ -149,19 +148,14 @@ def print_(*strings: str, end: str = "\n") -> None:
 
 def _bool_fallback(a, b):
     """Given a boolean or None, return the original value or a fallback."""
-    if a is None:
-        assert isinstance(b, bool)
-        return b
-    else:
-        assert isinstance(a, bool)
-        return a
+    pass
 
 
 def should_write(write_opt=None):
     """Decide whether a command that updates metadata should also write
     tags, using the importer configuration as the default.
     """
-    return _bool_fallback(write_opt, config["import"]["write"].get(bool))
+    pass
 
 
 def should_move(move_opt=None):
@@ -174,11 +168,7 @@ def should_move(move_opt=None):
     They should avoid moving files when the importer is configured not
     to touch any filenames.
     """
-    return _bool_fallback(
-        move_opt,
-        config["import"]["move"].get(bool)
-        or config["import"]["copy"].get(bool),
-    )
+    pass
 
 
 # Input prompts.
@@ -544,29 +534,7 @@ class CommonOptionsParser(optparse.OptionParser):
         """Internal callback that sets the correct format while parsing CLI
         arguments.
         """
-        if store_true:
-            setattr(parser.values, option.dest, True)
-
-        # Use the explicitly specified format, or the string from the option.
-        value = fmt or value or ""
-        parser.values.format = value
-
-        if target:
-            config[target._format_config_key].set(value)
-        else:
-            if self._album_flags:
-                if parser.values.album:
-                    target = library.Album
-                else:
-                    # the option is either missing either not parsed yet
-                    if self._album_flags & set(parser.rargs):
-                        target = library.Album
-                    else:
-                        target = library.Item
-                config[target._format_config_key].set(value)
-            else:
-                config[library.Item._format_config_key].set(value)
-                config[library.Album._format_config_key].set(value)
+        pass
 
     def add_path_option(self, flags=("-p", "--path")):
         """Add a -p/--path option to display the path instead of the default
@@ -663,14 +631,11 @@ class Subcommand:
 
     @property
     def root_parser(self):
-        return self._root_parser
+        pass
 
     @root_parser.setter
     def root_parser(self, root_parser):
-        self._root_parser = root_parser
-        self.parser.prog = (
-            f"{as_string(root_parser.get_prog_name())} {self.name}"
-        )
+        pass
 
 
 class SubcommandsOptionParser(CommonOptionsParser):
@@ -707,55 +672,7 @@ class SubcommandsOptionParser(CommonOptionsParser):
     # Add the list of subcommands to the help message.
     def format_help(self, formatter=None):
         # Get the original help message, to which we will append.
-        out = super().format_help(formatter)
-        if formatter is None:
-            formatter = self.formatter
-
-        # Subcommands header.
-        result = ["\n"]
-        result.append(formatter.format_heading("Commands"))
-        formatter.indent()
-
-        # Generate the display names (including aliases).
-        # Also determine the help position.
-        disp_names = []
-        help_position = 0
-        subcommands = [c for c in self.subcommands if not c.hide]
-        subcommands.sort(key=lambda c: c.name)
-        for subcommand in subcommands:
-            name = subcommand.name
-            if subcommand.aliases:
-                name += f" ({', '.join(subcommand.aliases)})"
-            disp_names.append(name)
-
-            # Set the help position based on the max width.
-            proposed_help_position = len(name) + formatter.current_indent + 2
-            if proposed_help_position <= formatter.max_help_position:
-                help_position = max(help_position, proposed_help_position)
-
-        # Add each subcommand to the output.
-        for subcommand, name in zip(subcommands, disp_names):
-            # Lifted directly from optparse.py.
-            name_width = help_position - formatter.current_indent - 2
-            if len(name) > name_width:
-                name = f"{' ' * formatter.current_indent}{name}\n"
-                indent_first = help_position
-            else:
-                name = f"{' ' * formatter.current_indent}{name:<{name_width}}\n"
-                indent_first = 0
-            result.append(name)
-            help_width = formatter.width - help_position
-            help_lines = textwrap.wrap(subcommand.help, help_width)
-            help_line = help_lines[0] if help_lines else ""
-            result.append(f"{' ' * indent_first}{help_line}\n")
-            result.extend(
-                [f"{' ' * help_position}{line}\n" for line in help_lines[1:]]
-            )
-        formatter.dedent()
-
-        # Concatenate the original help message with the subcommand
-        # list.
-        return f"{out}{''.join(result)}"
+        pass
 
     def _subcommand_for_name(self, name):
         """Return the subcommand in self.subcommands matching the
@@ -934,11 +851,7 @@ def _raw_main(args: list[str], lib=None) -> None:
         option: optparse.Option, _, value: str, parser: SubcommandsOptionParser
     ):
         """Parse a comma-separated list of values."""
-        setattr(
-            parser.values,
-            option.dest,  # type: ignore[arg-type]
-            list(filter(None, value.split(","))),
-        )
+        pass
 
     parser.add_option(
         "-p",

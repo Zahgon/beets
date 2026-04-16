@@ -33,17 +33,7 @@ def paths_from_logfile(path):
 
 def parse_logfiles(logfiles):
     """Parse all `logfiles` and yield paths from it."""
-    for logfile in logfiles:
-        try:
-            yield from paths_from_logfile(syspath(normpath(logfile)))
-        except ValueError as err:
-            raise ui.UserError(
-                f"malformed logfile {displayable_path(logfile)}: {err}"
-            ) from err
-        except OSError as err:
-            raise ui.UserError(
-                f"unreadable logfile {displayable_path(logfile)}: {err}"
-            ) from err
+    pass
 
 
 def import_files(lib, paths: list[bytes], query):
@@ -79,56 +69,7 @@ def import_files(lib, paths: list[bytes], query):
 
 
 def import_func(lib, opts, args: list[str]):
-    config["import"].set_args(opts)
-
-    # Special case: --copy flag suppresses import_move (which would
-    # otherwise take precedence).
-    if opts.copy:
-        config["import"]["move"] = False
-
-    if opts.library:
-        query = args
-        byte_paths = []
-    else:
-        query = None
-        paths = args
-
-        # The paths from the logfiles go into a separate list to allow handling
-        # errors differently from user-specified paths.
-        paths_from_logfiles = list(parse_logfiles(opts.from_logfiles or []))
-
-        if not paths and not paths_from_logfiles:
-            raise ui.UserError("no path specified")
-
-        byte_paths = [os.fsencode(p) for p in paths]
-        paths_from_logfiles = [os.fsencode(p) for p in paths_from_logfiles]
-
-        # Check the user-specified directories.
-        for path in byte_paths:
-            if not os.path.exists(syspath(normpath(path))):
-                raise ui.UserError(
-                    f"no such file or directory: {displayable_path(path)}"
-                )
-
-        # Check the directories from the logfiles, but don't throw an error in
-        # case those paths don't exist. Maybe some of those paths have already
-        # been imported and moved separately, so logging a warning should
-        # suffice.
-        for path in paths_from_logfiles:
-            if not os.path.exists(syspath(normpath(path))):
-                log.warning(
-                    "No such file or directory: {}", displayable_path(path)
-                )
-                continue
-
-            byte_paths.append(path)
-
-        # If all paths were read from a logfile, and none of them exist, throw
-        # an error
-        if not byte_paths:
-            raise ui.UserError("none of the paths are importable")
-
-    import_files(lib, byte_paths, query)
+    pass
 
 
 def _store_dict(option, opt_str, value, parser):
@@ -136,25 +77,7 @@ def _store_dict(option, opt_str, value, parser):
     pairs as values. All such pairs passed for this option are
     aggregated into a dictionary.
     """
-    dest = option.dest
-    option_values = getattr(parser.values, dest, None)
-
-    if option_values is None:
-        # This is the first supplied ``key=value`` pair of option.
-        # Initialize empty dictionary and get a reference to it.
-        setattr(parser.values, dest, {})
-        option_values = getattr(parser.values, dest)
-
-    try:
-        key, value = value.split("=", 1)
-        if not (key and value):
-            raise ValueError
-    except ValueError:
-        raise ui.UserError(
-            f"supplied argument `{value}' is not of the form `key=value'"
-        )
-
-    option_values[key] = value
+    pass
 
 
 import_cmd = ui.Subcommand(

@@ -190,7 +190,7 @@ class LazyConvertDict:
 
     def init(self, data: dict[str, Any]):
         """Set the base data that should be lazily converted"""
-        self._data = data
+        pass
 
     def _convert(self, key: str, value: Any):
         """Convert the attribute type according to the SQL type"""
@@ -327,7 +327,7 @@ class Model(ABC, Generic[D]):
     @cached_classproperty
     def _types(cls) -> dict[str, types.Type]:
         """Optional types for non-fixed (flexible and computed) fields."""
-        return {}
+        pass
 
     _sorts: ClassVar[dict[str, type[FieldSort]]] = {}
     """Optional named sort criteria. The keys are strings and the values
@@ -339,7 +339,7 @@ class Model(ABC, Generic[D]):
         """Named queries that use a field-like `name:value` syntax but which
         do not relate to any specific field.
         """
-        return {}
+        pass
 
     _always_dirty = False
     """By default, fields only become "dirty" when their value actually
@@ -355,7 +355,7 @@ class Model(ABC, Generic[D]):
     @cached_classproperty
     def _relation(cls):
         """The model that this model is closely related to."""
-        return cls
+        pass
 
     @cached_classproperty
     def relation_join(cls) -> str:
@@ -363,20 +363,20 @@ class Model(ABC, Generic[D]):
 
         This is intended to be used as a FROM clause in the SQL query.
         """
-        return ""
+        pass
 
     @cached_classproperty
     def all_db_fields(cls) -> set[str]:
-        return cls._fields.keys() | cls._relation._fields.keys()
+        pass
 
     @cached_classproperty
     def shared_db_fields(cls) -> set[str]:
-        return cls._fields.keys() & cls._relation._fields.keys()
+        pass
 
     @cached_classproperty
     def other_db_fields(cls) -> set[str]:
         """Fields in the related table."""
-        return cls._relation._fields.keys() - cls.shared_db_fields
+        pass
 
     @cached_property
     def db(self) -> D:
@@ -435,12 +435,7 @@ class Model(ABC, Generic[D]):
         This is a performance optimization: the checks involved with
         ordinary construction are bypassed.
         """
-        obj = cls(db)
-
-        obj._values_fixed.init(fixed_values)
-        obj._values_flex.init(flex_values)
-
-        return obj
+        pass
 
     def __repr__(self) -> str:
         return (
@@ -525,23 +520,7 @@ class Model(ABC, Generic[D]):
         """Assign the value for a field, return whether new and old value
         differ.
         """
-        # Choose where to place the value.
-        if key in self._fields:
-            source = self._values_fixed
-        else:
-            source = self._values_flex
-
-        # If the field has a type, filter the value.
-        value = self._type(key).normalize(value)
-
-        # Assign value and possibly mark as dirty.
-        old_value = source.get(key)
-        source[key] = value
-        changed = old_value != value
-        if self._always_dirty or changed:
-            self._dirty.add(key)
-
-        return changed
+        pass
 
     def __setitem__(self, key, value):
         """Assign the value for a field."""
@@ -834,30 +813,7 @@ class Results(Generic[AnyModel]):
         a `Results` object a second time should be much faster than the
         first.
         """
-
-        # Index flexible attributes by the item ID, so we have easier access
-        flex_attrs = self._get_indexed_flex_attrs()
-
-        index = 0  # Position in the materialized objects.
-        while index < len(self._objects) or self._rows:
-            # Are there previously-materialized objects to produce?
-            if index < len(self._objects):
-                yield self._objects[index]
-                index += 1
-
-            # Otherwise, we consume another row, materialize its object
-            # and produce it.
-            else:
-                while self._rows:
-                    row = self._rows.pop(0)
-                    obj = self._make_model(row, flex_attrs.get(row["id"], {}))
-                    # If there is a slow-query predicate, ensurer that the
-                    # object passes it.
-                    if not self.query or self.query.match(obj):
-                        self._objects.append(obj)
-                        index += 1
-                        yield obj
-                        break
+        pass
 
     def __iter__(self) -> Iterator[AnyModel]:
         """Construct and generate Model objects for all matching
@@ -874,25 +830,13 @@ class Results(Generic[AnyModel]):
 
     def _get_indexed_flex_attrs(self) -> dict[int, FlexAttrs]:
         """Index flexible attributes by the entity id they belong to"""
-        flex_values: dict[int, FlexAttrs] = {}
-        for row in self.flex_rows:
-            if row["entity_id"] not in flex_values:
-                flex_values[row["entity_id"]] = {}
-
-            flex_values[row["entity_id"]][row["key"]] = row["value"]
-
-        return flex_values
+        pass
 
     def _make_model(
         self, row: sqlite3.Row, flex_values: FlexAttrs = {}
     ) -> AnyModel:
         """Create a Model object for the given row"""
-        cols = dict(row)
-        values = {k: v for (k, v) in cols.items() if not k[:4] == "flex"}
-
-        # Construct the Python object
-        obj = self.model_class._awaken(self.db, values, flex_values)
-        return obj
+        pass
 
     def __len__(self) -> int:
         """Get the number of matching objects."""
@@ -1042,16 +986,11 @@ class Transaction:
         self, statement: str, subvals: Sequence[tuple[SQLiteType, ...]] = ()
     ) -> Any:
         """Run batched writes with shared mutation/error handling."""
-        with self._handle_mutate():
-            return (
-                self.db._connection().executemany(statement, subvals).lastrowid
-            )
+        pass
 
     def script(self, statements: str):
         """Execute a string containing multiple SQL statements."""
-        # We don't know whether this mutates, but quite likely it does.
-        self._mutated = True
-        self.db._connection().executescript(statements)
+        pass
 
 
 @dataclass
@@ -1065,25 +1004,16 @@ class Migration(ABC):
     @cached_classproperty
     def name(cls) -> str:
         """Class name (except Migration) converted to snake case."""
-        name = cls.__name__.removesuffix("Migration")  # type: ignore[attr-defined]
-        return re.sub(r"(?<=[a-z])(?=[A-Z])", "_", name).lower()
+        pass
 
     @contextmanager
     def with_row_factory(self, factory: type[NamedTuple]) -> Iterator[None]:
         """Temporarily decode query rows into a typed tuple shape."""
-        original_factory = self.db._connection().row_factory
-        self.db._connection().row_factory = lambda _, row: factory(*row)
-        try:
-            yield
-        finally:
-            self.db._connection().row_factory = original_factory
+        pass
 
     def migrate_model(self, model_cls: type[Model], *args, **kwargs) -> None:
         """Run this migration once for a model's backing table."""
-        table = model_cls._table
-        if not self.db.migration_exists(self.name, table):
-            self._migrate_data(model_cls, *args, **kwargs)
-            self.db.record_migration(self.name, table)
+        pass
 
     @abstractmethod
     def _migrate_data(
@@ -1162,29 +1092,7 @@ class Database:
 
     @cached_property
     def db_tables(self) -> dict[str, TableInfo]:
-        column_queries = [
-            f"""
-                SELECT '{m._table}' AS table_name, 'columns' AS source, name
-                FROM pragma_table_info('{m._table}')
-            """
-            for m in self._models
-        ]
-        with self.transaction() as tx:
-            rows = tx.query(f"""
-                {" UNION ALL ".join(column_queries)}
-                UNION ALL
-                SELECT table_name, 'migrations' AS source, name FROM migrations
-            """)
-
-        tables_data: dict[str, TableInfo] = defaultdict(
-            lambda: TableInfo(columns=set(), migrations=set())
-        )
-
-        source: Literal["columns", "migrations"]
-        for table_name, source, name in rows:
-            tables_data[table_name][source].add(name)
-
-        return tables_data
+        pass
 
     # Primitive access control: connections and transactions.
 
@@ -1248,9 +1156,7 @@ class Database:
 
     def add_functions(self, conn):
         def regexp(value, pattern):
-            if isinstance(value, bytes):
-                value = value.decode()
-            return re.search(pattern, str(value)) is not None
+            pass
 
         def bytelower(bytestring: AnyStr | None) -> AnyStr | None:
             """A custom ``bytelower`` sqlite function so we can compare
@@ -1260,10 +1166,7 @@ class Database:
             ``-DSQLITE_LIKE_DOESNT_MATCH_BLOBS``. See
             ``https://github.com/beetbox/beets/issues/2172`` for details.
             """
-            if bytestring is not None:
-                return bytestring.lower()
-
-            return bytestring
+            pass
 
         create_function = conn.create_function
         if sys.version_info >= (3, 8) and sqlite_version_info >= (3, 8, 3):
@@ -1292,14 +1195,7 @@ class Database:
         transaction stack. The context manager synchronizes access to
         the stack map. Transactions should never migrate across threads.
         """
-        thread_id = threading.current_thread().ident
-        # Help the type checker: ident can only be None if the thread has not
-        # been started yet; but since this results from current_thread(), that
-        # can't happen
-        assert thread_id is not None
-
-        with self._shared_map_lock:
-            yield self._tx_stacks[thread_id]
+        pass
 
     def transaction(self) -> Transaction:
         """Get a :class:`Transaction` object for interacting directly
@@ -1326,41 +1222,13 @@ class Database:
         """Set up the schema of the database. `fields` is a mapping
         from field names to `Type`s. Columns are added if necessary.
         """
-        if table not in self.db_tables:
-            # No table exists.
-            columns = []
-            for name, typ in fields.items():
-                columns.append(f"{name} {typ.sql}")
-            setup_sql = f"CREATE TABLE {table} ({', '.join(columns)});\n"
-            self.db_tables[table]["columns"] = set(fields)
-        else:
-            # Table exists does not match the field set.
-            setup_sql = ""
-            current_fields = self.db_tables[table]["columns"]
-            for name, typ in fields.items():
-                if name not in current_fields:
-                    setup_sql += (
-                        f"ALTER TABLE {table} ADD COLUMN {name} {typ.sql};\n"
-                    )
-
-        with self.transaction() as tx:
-            tx.script(setup_sql)
+        pass
 
     def _make_attribute_table(self, flex_table: str):
         """Create a table and associated index for flexible attributes
         for the given entity (if they don't exist).
         """
-        with self.transaction() as tx:
-            tx.script(f"""
-                CREATE TABLE IF NOT EXISTS {flex_table} (
-                    id INTEGER PRIMARY KEY,
-                    entity_id INTEGER,
-                    key TEXT,
-                    value TEXT,
-                    UNIQUE(entity_id, key) ON CONFLICT REPLACE);
-                CREATE INDEX IF NOT EXISTS {flex_table}_by_entity
-                    ON {flex_table} (entity_id);
-                """)
+        pass
 
     def _create_indices(
         self,
@@ -1368,45 +1236,24 @@ class Database:
         indices: Sequence[Index],
     ):
         """Create indices for the given table if they don't exist."""
-        with self.transaction() as tx:
-            for index in indices:
-                tx.script(
-                    f"CREATE INDEX IF NOT EXISTS {index.name} "
-                    f"ON {table} ({', '.join(index.columns)});"
-                )
+        pass
 
     # Generic migration state handling.
 
     def _ensure_migration_state_table(self) -> None:
-        with self.transaction() as tx:
-            tx.script("""
-                CREATE TABLE IF NOT EXISTS migrations (
-                    name TEXT NOT NULL,
-                    table_name TEXT NOT NULL,
-                    PRIMARY KEY(name, table_name)
-                );
-            """)
+        pass
 
     def _migrate(self) -> None:
         """Perform any necessary migration for the database."""
-        for migration_cls, model_classes in self._migrations:
-            migration = migration_cls(self)
-            for model_cls in model_classes:
-                migration.migrate_model(
-                    model_cls, self.db_tables[model_cls._table]["columns"]
-                )
+        pass
 
     def migration_exists(self, name: str, table: str) -> bool:
         """Return whether a named migration has been marked complete."""
-        return name in self.db_tables[table]["migrations"]
+        pass
 
     def record_migration(self, name: str, table: str) -> None:
         """Set completion state for a named migration."""
-        with self.transaction() as tx:
-            tx.mutate(
-                "INSERT INTO migrations(name, table_name) VALUES (?, ?)",
-                (name, table),
-            )
+        pass
 
     # Querying.
 

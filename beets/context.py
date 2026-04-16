@@ -12,7 +12,7 @@ def get_music_dir() -> bytes:
 
 def set_music_dir(value: bytes) -> None:
     """Set the current music directory context."""
-    _music_dir_var.set(value)
+    pass
 
 
 @contextmanager

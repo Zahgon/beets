@@ -516,14 +516,7 @@ def manual_search(session, task):
     Input either an artist and album (for full albums) or artist and
     track name (for singletons) for manual search.
     """
-    artist = ui.input_("Artist:").strip()
-    name = ui.input_("Album:" if task.is_album else "Track:").strip()
-
-    if task.is_album:
-        _, _, prop = tag_album(task.items, artist, name)
-        return prop
-    else:
-        return tag_item(task.item, artist, name)
+    pass
 
 
 def manual_id(session, task):
@@ -531,14 +524,7 @@ def manual_id(session, task):
 
     Input an ID, either for an album ("release") or a track ("recording").
     """
-    prompt = f"Enter {'release' if task.is_album else 'recording'} ID:"
-    search_id = ui.input_(prompt).strip()
-
-    if task.is_album:
-        _, _, prop = tag_album(task.items, search_ids=search_id.split())
-        return prop
-    else:
-        return tag_item(task.item, search_ids=search_id.split())
+    pass
 
 
 def abort_action(session, task):
